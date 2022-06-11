@@ -1,6 +1,7 @@
 const httpStatus = require('http-status')
 const catchAsync = require('../utils/catchAsync')
-const { authService, userService, tokenService, emailService } = require('../services')
+const ApiError = require('../utils/ApiError')
+const { tenantService, authService, userService, tokenService, emailService } = require('../services')
 
 const register = catchAsync(async (req, res) => {
 
@@ -12,9 +13,20 @@ const register = catchAsync(async (req, res) => {
 
 const login = catchAsync(async (req, res) => {
 
-    const { email, password } = req.body
-    const user = await authService.loginUserWithEmailAndPassword(email, password)
+    const { username, password, cdn } = req.body
+    const tenant = await tenantService.getTenantByCdn(cdn)
+
+    if (!tenant)
+        throw new ApiError(httpStatus.NOT_FOUND, 'Tenant not found')
+
+    if (!tenant.active)
+        throw new ApiError(httpStatus.FORBIDDEN, 'Tenant is not active')
+
+    tenantService.setTenantIdToDatabaseNamespace(tenant.id)
+
+    const user = await authService.login(username, password)
     const tokens = await tokenService.generateAuthTokens(user)
+
     res.send( { user, tokens } )
 
 } )

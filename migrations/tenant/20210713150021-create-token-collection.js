@@ -7,7 +7,7 @@ module.exports = {
 
         // TOKEN COLLECTION
 
-        const tokenCollection = await db.createCollection('token')
+        const tokenCollection = await db.createCollection('tokens')
 
         logger.debug('token collection was created')
 
@@ -31,7 +31,7 @@ module.exports = {
     async down(db, client) {
 
         logger.info('[down] create-token-collection')
-        await db.dropCollection('token')
+        await db.dropCollection('tokens')
         logger.debug('token collection was dropped')
 
     },

@@ -1,4 +1,5 @@
 const mongoose = require('mongoose')
+const defaultModelOptions = require('./options/default')
 const { toJSON } = require('./plugins')
 const { tokenTypes } = require('../config/tokens')
 
@@ -29,16 +30,16 @@ const tokenSchema = mongoose.Schema(
         },
     },
     {
-        timestamps: true,
+        ...defaultModelOptions,
+        timestamps : true,
+        collection : 'tokens',
     },
 )
 
 // add plugin that converts mongoose to json
 tokenSchema.plugin(toJSON)
 
-/**
- * @typedef Token
- */
-const Token = mongoose.model('Token', tokenSchema)
-
-module.exports = Token
+module.exports = {
+    name   : 'Token',
+    schema : tokenSchema,
+}

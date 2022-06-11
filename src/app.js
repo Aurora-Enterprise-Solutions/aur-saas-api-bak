@@ -13,6 +13,7 @@ const { authLimiter } = require('./middlewares/rateLimiter')
 const routes = require('./routes/v1')
 const { errorConverter, errorHandler } = require('./middlewares/error')
 const ApiError = require('./utils/ApiError')
+const tenantDbMiddleware = require('./middlewares/tenant')
 
 const app = express()
 
@@ -47,10 +48,12 @@ app.options('*', cors() )
 app.use(passport.initialize() )
 passport.use('jwt', jwtStrategy)
 
+// select tenant database
+app.use('/v1', tenantDbMiddleware)
+
 // limit repeated failed requests to auth endpoints
 if (config.env === 'production')
     app.use('/v1/auth', authLimiter)
-
 
 // v1 api routes
 app.use('/v1', routes)

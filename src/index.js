@@ -1,13 +1,20 @@
-require('./config/db')
 const app = require('./app')
 const config = require('./config/config')
 const logger = require('./config/logger')
+const { openConnection } = require('./config/db/dbConnection')
 
-const server = app.listen(config.port, () => {
+let server
 
-    logger.info(`Listening to port ${config.port}`)
+openConnection()
+    .then( () => {
 
-} )
+        server = app.listen(config.port, () => {
+
+            logger.info(`Listening to port ${config.port}`)
+
+        } )
+
+    } )
 
 const exitHandler = () => {
 

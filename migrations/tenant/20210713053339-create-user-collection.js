@@ -7,7 +7,7 @@ module.exports = {
 
         // USER COLLECTION
 
-        const userCollection = await db.createCollection('user')
+        const userCollection = await db.createCollection('users')
 
         logger.debug('user collection was created')
 
@@ -26,7 +26,7 @@ module.exports = {
     async down(db, client) {
 
         logger.info('[down] create-user-collection')
-        await db.dropCollection('user')
+        await db.dropCollection('users')
         logger.debug('user collection was dropped')
 
     },

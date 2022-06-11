@@ -2,25 +2,34 @@ const mongoose = require('mongoose')
 const config = require('../config')
 const logger = require('../logger')
 
-const openConnection = async () => {
+const mongoConnections = {
+    default: null,
+}
 
-    const dbHostUrl = config.mongoose.url
-    const dbConnection = mongoose.createConnection(dbHostUrl, config.mongoose.options)
+const openConnection = async (instance = 'default', dbHostUrl = config.mongoose.url) => {
 
-    dbConnection.on('open', () => {
+    try {
 
+        const dbConnection = await mongoose.createConnection(dbHostUrl, config.mongoose.options)
         logger.info(`Mongoose connection open to ${JSON.stringify(dbHostUrl)}`)
+        mongoConnections[instance] = dbConnection
 
-    } )
-
-    dbConnection.on('error', (err) => {
+    }
+    catch (err) {
 
         throw new Error(`Mongoose connection error: ${err} with connection info ${JSON.stringify(dbHostUrl)}`)
 
-    } )
-
-    return dbConnection
+    }
 
 }
 
-exports.mongoConnection = (openConnection)()
+exports.mongoConnection = (instance = 'default') => {
+
+    if (!mongoConnections[instance] )
+        openConnection(instance)
+
+    return mongoConnections[instance]
+
+}
+
+exports.openConnection = openConnection

@@ -7,7 +7,7 @@ module.exports = {
 
         // TENANT COLLECTION
 
-        const tenantCollection = await db.createCollection('tenant')
+        const tenantCollection = await db.createCollection('tenants')
 
         logger.debug('tenant collection was created')
 
@@ -26,7 +26,7 @@ module.exports = {
     async down(db, client) {
 
         logger.info('[down] create-tenant-collection')
-        await db.dropCollection('tenant')
+        await db.dropCollection('tenants')
         logger.debug('tenant collection was dropped')
 
     },

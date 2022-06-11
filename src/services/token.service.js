@@ -3,7 +3,8 @@ const moment = require('moment')
 const httpStatus = require('http-status')
 const config = require('../config/config')
 const userService = require('./user.service')
-const { Token } = require('../models')
+const { mongooseModel } = require('../config/db/connectionManager')
+const Token = require('../models/token.model')
 const ApiError = require('../utils/ApiError')
 const { tokenTypes } = require('../config/tokens')
 
@@ -39,7 +40,7 @@ const generateToken = (userId, expires, type, secret = config.jwt.secret) => {
  */
 const saveToken = async (token, userId, expires, type, blacklisted = false) => {
 
-    const tokenDoc = await Token.create( {
+    const tokenDoc = await mongooseModel(Token).create( {
         token,
         user    : userId,
         expires : expires.toDate(),
@@ -60,10 +61,10 @@ const saveToken = async (token, userId, expires, type, blacklisted = false) => {
 const verifyToken = async (token, type) => {
 
     const payload = jwt.verify(token, config.jwt.secret)
-    const tokenDoc = await Token.findOne( { token, type, user: payload.sub, blacklisted: false } )
+    const tokenDoc = await mongooseModel(Token).findOne( { token, type, user: payload.sub, blacklisted: false } )
     if (!tokenDoc)
         throw new Error('Token not found')
-  
+
     return tokenDoc
 
 }
@@ -105,7 +106,7 @@ const generateResetPasswordToken = async (email) => {
     const user = await userService.getUserByEmail(email)
     if (!user)
         throw new ApiError(httpStatus.NOT_FOUND, 'No users found with this email')
-  
+
     const expires = moment().add(config.jwt.resetPasswordExpirationMinutes, 'minutes')
     const resetPasswordToken = generateToken(user.id, expires, tokenTypes.RESET_PASSWORD)
     await saveToken(resetPasswordToken, user.id, expires, tokenTypes.RESET_PASSWORD)
